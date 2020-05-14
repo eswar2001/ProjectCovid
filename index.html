@@ -107,7 +107,9 @@
 <body>
 
   <div id="container"></div>
-
+  <div class="container" id="chartContainer"
+    style="height: 300px; width: 500px; margin: 1px auto; position:fixed; bottom: 0; left: 0;">
+  </div>
   <div id="currentInfo">
     <span id="year2020" class="year">2020</span>
   </div>
@@ -137,6 +139,7 @@
       //   max = parseInt(va["Global"]["TotalConfirmed"]);
       // });
       $.getJSON('https://corona.lmao.ninja/v2/countries', function (data) {
+
         var totalcount = [];
         var sum = 0;
         for (var i in data) {
@@ -220,6 +223,96 @@
     });
   </script>
 
+  <script src="https://canvasjs.com/assets/script/jquery-1.11.1.min.js"></script>
+  <script src="https://canvasjs.com/assets/script/jquery.canvasjs.min.js"></script>
+  <script>
+    $(document).ready(function () {
+
+      $.getJSON('https://corona.lmao.ninja/v2/historical/all', function (data) {
+        var _D = data;
+        var options = {
+          zoomEnabled: true,
+          animationEnabled: true,
+          theme: "dark2",
+          axisX: {},
+          axisY: {},
+          toolTip: {
+            shared: true
+          },
+          legend: {
+            cursor: "pointer",
+            verticalAlign: "bottom",
+            horizontalAlign: "left",
+            dockInsidePlotArea: true,
+            itemclick: toogleDataSeries
+          },
+          data: [{
+              type: "line",
+              showInLegend: true,
+              name: "Confirmed",
+              markerType: "square",
+              xValueFormatString: "DD MMM, YYYY",
+              color: "#F08080",
+              yValueFormatString: "#,##0",
+              dataPoints: [
+
+              ]
+            },
+            {
+              type: "line",
+              showInLegend: true,
+              name: "Recovered",
+              lineDashType: "dash",
+              yValueFormatString: "#,##0",
+              dataPoints: [
+
+              ]
+            },
+            {
+              type: "line",
+              showInLegend: true,
+              name: "Died",
+              lineDashType: "dash",
+              yValueFormatString: "#,##0",
+              dataPoints: [
+
+              ]
+            }
+          ]
+        };
+        for (var Confirmed in _D["cases"]) {
+          // console.log(Confirmed);
+          // console.log(_D["cases"][Confirmed]);
+          options.data[0].dataPoints.push({
+            x: new Date(Confirmed),
+            y: parseInt(_D["cases"][Confirmed])
+          });
+        }
+        for (var deaths in _D["deaths"]) {
+          options.data[2].dataPoints.push({
+            x: new Date(deaths),
+            y: parseInt(_D["deaths"][deaths])
+          });
+        }
+        for (var reco in _D["recovered"]) {
+          options.data[1].dataPoints.push({
+            x: new Date(reco),
+            y: parseInt(_D["recovered"][reco])
+          });
+        }
+        $("#chartContainer").CanvasJSChart(options);
+
+        function toogleDataSeries(e) {
+          if (typeof (e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
+            e.dataSeries.visible = false;
+          } else {
+            e.dataSeries.visible = true;
+          }
+          e.chart.render();
+        }
+      });
+    });
+  </script>
 </body>
 
 </html>
