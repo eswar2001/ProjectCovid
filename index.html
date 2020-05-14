@@ -124,6 +124,7 @@
   <script type="text/javascript">
     // const math = require('mathjs');
 
+    var i = 0;
     var imgDir = ['world-blue.jpg', 'world.jpg'];
     $(document).ready(function () {
 
@@ -203,18 +204,17 @@
           globe.createPoints();
           settime(globe, 0)();
           globe.animate();
-          var i = 0;
-        //   setInterval(function () {
-        //     if (i = 0) {
-        //       i = 1;
-        //     } else {
-        //       i = 0;
-        //     }
-        //     globe.createPoints();
-        //   settime(globe, 0)();
-        //   globe.animate();
-        //   }, 5000);
-        // }
+          //   setInterval(function () {
+          //     if (i = 0) {
+          //       i = 1;
+          //     } else {
+          //       i = 0;
+          //     }
+          //     globe.createPoints();
+          //   settime(globe, 0)();
+          //   globe.animate();
+          //   }, 5000);
+        }
       });
 
     });
