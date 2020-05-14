@@ -103,9 +103,6 @@
   </style>
 </head>
 <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
-<script>
-
-</script>
 
 <body>
 
@@ -116,92 +113,111 @@
   </div>
 
   <div id="title">
-    World Covid count
+    Covid-19
   </div>
 
+  <script src="./node_modules/mathjs/dist/math.js" type="text/javascript"></script>
   <script type="text/javascript" src="third-party/Detector.js"></script>
   <script type="text/javascript" src="third-party/three.min.js"></script>
   <script type="text/javascript" src="third-party/Tween.js"></script>
   <script type="text/javascript" src="globe.js"></script>
   <script type="text/javascript">
-    var s = []; // the data needs to be put in json and given to json.parse() down below
+    // const math = require('mathjs');
+
+    var imgDir = ['world-blue.jpg', 'world.jpg'];
     $(document).ready(function () {
+
+      var final_data = [];
+      var time_series = [];
+      var s = []; // the data needs to be put in json and given to json.parse() down below
+
       var max = 5700779;
       // $.getJSON('https://api.covid19api.com/summary', function (va) {
       //   max = parseInt(va["Global"]["TotalConfirmed"]);
       // });
       $.getJSON('https://corona.lmao.ninja/v2/countries', function (data) {
-
+        var totalcount = [];
+        var sum = 0;
+        for (var i in data) {
+          var value = parseInt(data[i].cases);
+          sum += value;
+          totalcount.push(value);
+        }
+        max = math.std(totalcount, 'uncorrected');
         // console.log(max);
         for (var i in data) {
-          // console.log(data[i]["countryInfo"].lat);
+          // console.log(data[i]["countryInfo"].lat); 
           // console.log(data[i]["countryInfo"].long);
           s.push(parseFloat(data[i]["countryInfo"].lat));
           s.push(parseFloat(data[i]["countryInfo"].long));
           var value = parseInt(data[i].cases) / max;
           s.push(parseFloat(value.toFixed(4)));
         }
-        console.log(s);
+        // console.log(s);
+      }).then(function () {
+        time_series.push("2020");
+        time_series.push(s);
+        final_data.push(time_series);
+        if (!Detector.webgl) {
+          Detector.addGetWebGLMessage();
+        } else {
+
+          var years = ['2020'];
+          var globe = DAT.Globe(document.getElementById('container'), imgDir[i]);
+
+          var i, tweens = [];
+
+          var settime = function (globe, t) {
+            return function () {
+              new TWEEN.Tween(globe).to({
+                time: t / years.length
+              }, 500).easing(TWEEN.Easing.Cubic.EaseOut).start();
+              var y = document.getElementById('year' + years[t]);
+              if (y.getAttribute('class') === 'year active') {
+                return;
+              }
+              var yy = document.getElementsByClassName('year');
+              for (i = 0; i < yy.length; i++) {
+                yy[i].setAttribute('class', 'year');
+              }
+              y.setAttribute('class', 'year active');
+            };
+          };
+
+          for (var i = 0; i < years.length; i++) {
+            var y = document.getElementById('year' + years[i]);
+            y.addEventListener('mouseover', settime(globe, i), false);
+          }
+          TWEEN.start();
+
+          window.data = final_data;
+          for (i = 0; i < final_data.length; i++) {
+            globe.addData(final_data[i][1], {
+              format: 'magnitude',
+              name: final_data[i][0],
+              animated: true
+            });
+          }
+
+          console.log(globe);
+          globe.createPoints();
+          settime(globe, 0)();
+          globe.animate();
+          var i = 0;
+        //   setInterval(function () {
+        //     if (i = 0) {
+        //       i = 1;
+        //     } else {
+        //       i = 0;
+        //     }
+        //     globe.createPoints();
+        //   settime(globe, 0)();
+        //   globe.animate();
+        //   }, 5000);
+        // }
       });
+
     });
-    if (!Detector.webgl) {
-      Detector.addGetWebGLMessage();
-    } else {
-
-      var years = ['2020'];
-      var container = document.getElementById('container');
-      var globe = new DAT.Globe(container);
-
-      // console.log(globe);
-      var i, tweens = [];
-
-      var settime = function (globe, t) {
-        return function () {
-          new TWEEN.Tween(globe).to({
-            time: t / years.length
-          }, 500).easing(TWEEN.Easing.Cubic.EaseOut).start();
-          var y = document.getElementById('year' + years[t]);
-          if (y.getAttribute('class') === 'year active') {
-            return;
-          }
-          var yy = document.getElementsByClassName('year');
-          for (i = 0; i < yy.length; i++) {
-            yy[i].setAttribute('class', 'year');
-          }
-          y.setAttribute('class', 'year active');
-        };
-      };
-
-      for (var i = 0; i < years.length; i++) {
-        var y = document.getElementById('year' + years[i]);
-        y.addEventListener('mouseover', settime(globe, i), false);
-      }
-
-      var xhr;
-      TWEEN.start();
-      xhr = new XMLHttpRequest();
-      xhr.open('GET', 'data.json', true);
-      xhr.onreadystatechange = function (e) {
-        if (xhr.readyState === 4) {
-          if (xhr.status === 200) {
-            var data = JSON.parse(xhr.responseText);
-            window.data = data;
-            for (i = 0; i < data.length; i++) {
-              globe.addData(data[i][1], {
-                format: 'magnitude',
-                name: data[i][0],
-                animated: true
-              });
-            }
-            globe.createPoints();
-            settime(globe, 0)();
-            globe.animate();
-            // document.body.style.backgroundImage = 'none'; // remove loading
-          }
-        }
-      };
-      xhr.send(null);
-    }
   </script>
 
 </body>

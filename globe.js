@@ -13,15 +13,21 @@
 
 var DAT = DAT || {};
 
-DAT.Globe = function (container, opts) {
-  opts = opts || {};
+DAT.Globe = function (container, imgDir) {
+  // opts = opts || {};
 
-  var colorFn = opts.colorFn || function (x) {
+  var colorFn = colorFn || function (x) {
     var c = new THREE.Color();
-    c.setHSL((0.6 - (x * 0.5)), 1.0, 0.5);
+    c.setHSL((0.2 - (x * 0.1)), 1.0, 0.7);
     return c;
   };
-  var imgDir = 'world.jpg';
+
+  // var colorFn = opts.colorFn || function (x) {
+  //   var c = new THREE.Color();
+  //   c.setHSL((0.6 - (x * 0.5)), 1.0, 0.5);
+  //   return c;
+  // };
+  imgDir = imgDir || 'world.jpg';
 
   var Shaders = {
     'earth': {
@@ -104,6 +110,9 @@ DAT.Globe = function (container, opts) {
     distanceTarget = 100000;
   var padding = 40;
   var PI_HALF = Math.PI / 2;
+  var ROTATIONSPEED = 0.003;
+  var k = ROTATIONSPEED;
+  var f = false;
 
   function init() {
 
@@ -124,7 +133,7 @@ DAT.Globe = function (container, opts) {
     shader = Shaders['earth'];
     uniforms = THREE.UniformsUtils.clone(shader.uniforms);
 
-    uniforms['texture'].value = THREE.ImageUtils.loadTexture('world.jpg');
+    uniforms['texture'].value = THREE.ImageUtils.loadTexture(imgDir);
 
     material = new THREE.ShaderMaterial({
 
@@ -332,6 +341,10 @@ DAT.Globe = function (container, opts) {
   }
 
   function onMouseUp(event) {
+
+    k = ROTATIONSPEED;
+    f = false;
+
     container.removeEventListener('mousemove', onMouseMove, false);
     container.removeEventListener('mouseup', onMouseUp, false);
     container.removeEventListener('mouseout', onMouseOut, false);
@@ -339,10 +352,26 @@ DAT.Globe = function (container, opts) {
   }
 
   function onMouseOut(event) {
+
+    k = ROTATIONSPEED;
+    f = false;
+
     container.removeEventListener('mousemove', onMouseMove, false);
     container.removeEventListener('mouseup', onMouseUp, false);
     container.removeEventListener('mouseout', onMouseOut, false);
   }
+  // function onMouseUp(event) {
+  //   container.removeEventListener('mousemove', onMouseMove, false);
+  //   container.removeEventListener('mouseup', onMouseUp, false);
+  //   container.removeEventListener('mouseout', onMouseOut, false);
+  //   container.style.cursor = 'auto';
+  // }
+
+  // function onMouseOut(event) {
+  //   container.removeEventListener('mousemove', onMouseMove, false);
+  //   container.removeEventListener('mouseup', onMouseUp, false);
+  //   container.removeEventListener('mouseout', onMouseOut, false);
+  // }
 
   function onMouseWheel(event) {
     event.preventDefault();
@@ -385,8 +414,18 @@ DAT.Globe = function (container, opts) {
   function render() {
     zoom(curZoomSpeed);
 
-    rotation.x += (target.x - rotation.x) * 0.1;
-    rotation.y += (target.y - rotation.y) * 0.1;
+    target.x -= k;
+
+    rotation.x += (target.x - rotation.x) * 0.2;
+
+    if (f == true) {
+      rotation.y += (target.y - rotation.y) * 0.2;
+    }
+    if (f == false) {
+      target.y = Math.PI / 5.0;
+      rotation.y += (target.y - rotation.y) * 0.02;
+    };
+
     distance += (distanceTarget - distance) * 0.3;
 
     camera.position.x = distance * Math.sin(rotation.x) * Math.cos(rotation.y);
@@ -396,7 +435,25 @@ DAT.Globe = function (container, opts) {
     camera.lookAt(mesh.position);
 
     renderer.render(scene, camera);
+
   }
+
+
+  // function render() {
+  //   zoom(curZoomSpeed);
+
+  //   rotation.x += (target.x - rotation.x) * 0.1;
+  //   rotation.y += (target.y - rotation.y) * 0.1;
+  //   distance += (distanceTarget - distance) * 0.3;
+
+  //   camera.position.x = distance * Math.sin(rotation.x) * Math.cos(rotation.y);
+  //   camera.position.y = distance * Math.sin(rotation.y);
+  //   camera.position.z = distance * Math.cos(rotation.x) * Math.cos(rotation.y);
+
+  //   camera.lookAt(mesh.position);
+
+  //   renderer.render(scene, camera);
+  // }
 
   init();
   this.animate = animate;
