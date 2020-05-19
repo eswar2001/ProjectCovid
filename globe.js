@@ -27,8 +27,8 @@ DAT.Globe = function (container, imgDir) {
   //   c.setHSL((0.6 - (x * 0.5)), 1.0, 0.5);
   //   return c;
   // };
-  imgDir = imgDir || 'world.jpg';
-
+  // imgDir = imgDir || 'world.jpg';
+  imgDir = 'worldMask.jpg'
   var Shaders = {
     'earth': {
       uniforms: {
@@ -343,7 +343,6 @@ DAT.Globe = function (container, imgDir) {
   function onMouseUp(event) {
 
     k = ROTATIONSPEED;
-    f = false;
 
     container.removeEventListener('mousemove', onMouseMove, false);
     container.removeEventListener('mouseup', onMouseUp, false);
